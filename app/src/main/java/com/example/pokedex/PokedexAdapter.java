@@ -4,6 +4,8 @@ import android.content.Context;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
+import android.widget.Filter;
+import android.widget.Filterable;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.content.Intent;
@@ -28,7 +30,30 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class PokedexAdapter extends RecyclerView.Adapter<PokedexAdapter.PokedexViewHolder> {
+public class PokedexAdapter extends RecyclerView.Adapter<PokedexAdapter.PokedexViewHolder> implements Filterable {
+  private List<Pokemon> filteredPokemon = new ArrayList<>();
+
+  private class PokemonFilter extends Filter {
+    @Override
+    protected FilterResults performFiltering(CharSequence constraint) {
+      FilterResults results = new FilterResults();
+      results.values = filteredPokemon;
+      results.count = filteredPokemon.size();
+      return results;
+    }
+
+    @Override
+    protected void publishResults(CharSequence constraint, FilterResults results) {
+      filteredPokemon = (List<Pokemon>) results.values;
+      notifyDataSetChanged();
+    }
+  }
+
+  @Override
+  public Filter getFilter() {
+    return new PokemonFilter();
+  }
+
   public static class PokedexViewHolder extends RecyclerView.ViewHolder {
     public LinearLayout containerView;
     public TextView textView;
@@ -100,13 +125,13 @@ public class PokedexAdapter extends RecyclerView.Adapter<PokedexAdapter.PokedexV
 
   @Override
   public void onBindViewHolder(@NonNull PokedexViewHolder holder, int position) {
-    Pokemon current = pokemon.get(position);
+    Pokemon current = filteredPokemon.get(position);
     holder.textView.setText(current.getName());
     holder.containerView.setTag(current);
   }
 
   @Override
   public int getItemCount() {
-    return pokemon.size();
+    return filteredPokemon.size();
   }
 }
